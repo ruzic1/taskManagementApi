@@ -26,7 +26,8 @@ namespace TaskManagementAPI.Services.Auth
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id.ToString()),   // ID korisnika
                 new Claim(JwtRegisteredClaimNames.UniqueName, user.Username), // Korisničko ime
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
-                new Claim(ClaimTypes.Role,user.Role.ToString())
+                new Claim(ClaimTypes.Role,user.Role?.RoleName??"User")
+                // new Claim(ClaimTypes.Role,user.Role.ToString())
             };
 
             var token = new JwtSecurityToken(

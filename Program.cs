@@ -18,6 +18,7 @@ builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddTransient<IAuthService, AuthService>();
 builder.Services.AddScoped<ITaskService, TaskService>();
+builder.Services.AddScoped<IRoleRepository,RoleRepository>();
 builder.Services.AddScoped<ITaskRepository, TaskRepository>();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -64,7 +65,7 @@ builder.Services.AddAuthentication(options=>
         {
             OnAuthenticationFailed = context =>
             {
-                Console.WriteLine($"JWT greška: {context.Exception.Message}");
+                Console.WriteLine($"JWT greï¿½ka: {context.Exception.Message}");
                 return Task.CompletedTask;
             }
         };
@@ -74,7 +75,7 @@ builder.Services.AddSwaggerGen(c =>
 {
     c.SwaggerDoc("v1", new OpenApiInfo { Title = "TaskManagement Api", Version = "v1" });
 
-    // Definiši JWT shemu
+    // Definiï¿½i JWT shemu
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         In = ParameterLocation.Header,

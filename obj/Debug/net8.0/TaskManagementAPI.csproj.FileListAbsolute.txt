@@ -257,3 +257,4 @@ C:\Users\Computer\source\repos\TaskManagementAPI\TaskManagementAPI\bin\Debug\net
 C:\Users\Computer\source\repos\TaskManagementAPI\TaskManagementAPI\bin\Debug\net8.0\TaskManagementAPI.staticwebassets.endpoints.json
 C:\Users\Computer\source\repos\TaskManagementAPI\TaskManagementAPI\obj\Debug\net8.0\staticwebassets.build.endpoints.json
 C:\Users\Computer\source\repos\TaskManagementAPI\TaskManagementAPI\obj\Debug\net8.0\staticwebassets\msbuild.TaskManagementAPI.Microsoft.AspNetCore.StaticWebAssetEndpoints.props
+C:\Users\Computer\source\repos\TaskManagementAPI\TaskManagementAPI\obj\Debug\net8.0\TaskManagementAPI.sourcelink.json

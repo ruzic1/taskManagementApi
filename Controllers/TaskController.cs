@@ -56,15 +56,26 @@ namespace TaskManagementAPI.Controllers
 
         [Authorize]
         [HttpPost("CreateTask")]
-        public IActionResult CreateTask([FromBody] CreateTaskDTO newTaskData)
+        public async Task<IActionResult> CreateTask([FromBody] CreateTaskDTO newTaskData)
         {
-            var service=_taskService.CreateTask(newTaskData);
-            if (service)
-            {
-                return Ok(new { message = "Uspesno unet task, samo jos da se doda u tabeli TASKASSIGNMENT" });
-            }
-            else return BadRequest();
+            var service=await _taskService.CreateTask(newTaskData);
+            return service ? Ok("Task created successfully.") : BadRequest("Task creation failed.");
+            // if (service!=null)
+            // {
+            //     return Ok(new { message = "Uspesno unet task, samo jos da se doda u tabeli TASKASSIGNMENT" });
+            // }
+            // else return BadRequest();
 
+        }
+        #endregion
+
+        #region DeleteData
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteTaskById(int id)
+        {
+            var deleteTask=await _taskService.DeleteTaskService(id);
+            return deleteTask?Ok("Task deleted successfully"):BadRequest("Task deleting failed");
         }
         #endregion
 

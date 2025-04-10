@@ -8,6 +8,10 @@ namespace TaskManagementAPI.Repositories
     {
         List<TaskModel> GetTasks();
         List<User> GetUsersByCompany(int id);
-        bool CreateTask(TaskModel task);
+        //bool CreateTask(TaskModel task);
+        Task<bool> AddTaskAsync(TaskModel task);
+        Task<bool> AddTaskAssignmentAsync(TaskAssignment taskAssignment);
+
+        Task<bool> DeleteTask(int id);
     }
 }

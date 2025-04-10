@@ -6,6 +6,7 @@ namespace TaskManagementAPI.Services
     {
         List<TaskDTO> GetTasks();
         List<UserDTO> GetUsersByCompanyService(int userId);
-        bool CreateTask(CreateTaskDTO taskDTO);
+        Task<bool> CreateTask(CreateTaskDTO taskDTO);
+        Task<bool> DeleteTaskService(int taskId);
     }
 }

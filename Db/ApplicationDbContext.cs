@@ -12,15 +12,20 @@ namespace TaskManagementAPI.Db
         }
         public DbSet<User> Users { get; set; }
         public DbSet<Task> Tasks { get; set; }
-        //public DbSet<TaskAssignment> TaskAssignments { get; set; }
+        public DbSet<TaskAssignment> TaskAssignments { get; set; }
         public DbSet<Comment> Comments { get; set; }
         public DbSet<Company> Companies { get; set; }
+        public DbSet<Role> Roles{get;set;}
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
 
             base.OnModelCreating(modelBuilder);
 
+            modelBuilder.Entity<Role>().HasData(
+                new Role{Id=1, RoleName="User"},
+                new Role{Id=2, RoleName="Admin"}
+            );
             // Primer konfiguracije - postavljanje maksimalne duzine za ime
             //modelBuilder.Entity<User>()
             //    .Property(u => u.Name)
@@ -96,12 +101,13 @@ namespace TaskManagementAPI.Db
 
                 .HasColumnType("nvarchar(40)");
 
-            modelBuilder.Entity<User>()
-                .Property(u=>u.Role)
-                .HasConversion(
-            v => v.ToString(),      // Enum -> String pre upisa u bazu
-            v => (UserRole)Enum.Parse(typeof(UserRole), v) // String -> Enum pri čitanju iz baze
-        );
+            
+        //     modelBuilder.Entity<User>()
+        //         .Property(u=>u.Role)
+        //         .HasConversion(
+        //     v => v.ToString(),      
+        //     v => (UserRole)Enum.Parse(typeof(UserRole), v) 
+        // );
 
             #endregion
 

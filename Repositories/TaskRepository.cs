@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using TaskManagementAPI.Db;
 using TaskManagementAPI.Models;
 using TaskModel = TaskManagementAPI.Models.Task;
@@ -48,17 +49,60 @@ namespace TaskManagementAPI.Repositories
             return users;
             //
         }
-        public bool CreateTask(TaskModel task)
+        //public bool CreateTask(TaskModel task)
+        //{
+        //    if (task==null)
+        //    {          
+        //        return false;
+        //    }
+        //    else
+        //    {
+
+        //        _context.Add(task);
+        //        _context.SaveChanges();
+        //        return true;
+        //    }
+        //}
+        public async Task<bool> AddTaskAsync(TaskModel task)
         {
-            if (task==null)
-            {          
+            try
+            {
+                await _context.Tasks.AddAsync(task);
+                await _context.SaveChangesAsync();
+                return true;
+            }
+            catch
+            {
                 return false;
             }
-            else
+        }
+        public async Task<bool> AddTaskAssignmentAsync(TaskAssignment taskAssignment)
+        {
+            try
             {
-                _context.Add(task);
-                _context.SaveChanges();
+                await _context.TaskAssignments.AddAsync(taskAssignment);
+                await _context.SaveChangesAsync();
                 return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+        public async Task<bool> DeleteTask(int id){
+            try
+            {
+                var task=await _context.Tasks.FirstOrDefaultAsync(x=>x.Id==id);
+
+                if(task==null){
+                    throw new Exception("Task not found");
+                }
+                _context.Tasks.Remove(task);
+                await _context.SaveChangesAsync();
+                return true;
+
+            }catch(Exception ex){
+                throw new Exception("Error: [message] - "+ex.Message);
             }
         }
     }

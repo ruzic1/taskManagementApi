@@ -1,5 +1,8 @@
-﻿using TaskManagementAPI.DTO;
+﻿using TaskManagementAPI.Db;
+using TaskManagementAPI.DTO;
+using TaskManagementAPI.Models;
 using TaskManagementAPI.Repositories;
+using Xunit.Sdk;
 using TaskModel = TaskManagementAPI.Models.Task;
 
 namespace TaskManagementAPI.Services
@@ -7,9 +10,11 @@ namespace TaskManagementAPI.Services
     public class TaskService:ITaskService
     {
         private readonly ITaskRepository _taskRepository;
-        public TaskService(ITaskRepository taskRepParam)
+        private readonly ApplicationDbContext _context;
+        public TaskService(ITaskRepository taskRepParam, ApplicationDbContext dbContext)
         {
             _taskRepository = taskRepParam;
+            _context= dbContext;
         }
         public List<TaskDTO> GetTasks()
         {
@@ -20,6 +25,7 @@ namespace TaskManagementAPI.Services
             }
             return callToRep.Select(x => new TaskDTO
             {
+                Id=x.Id,
                 Description = x.Description,
                 Title=x.Title,
                 DueDate = x.DueDate,
@@ -46,24 +52,67 @@ namespace TaskManagementAPI.Services
             }).ToList();       
         }
 
-        public bool CreateTask(CreateTaskDTO task)
+        public async Task<bool> CreateTask(CreateTaskDTO task)
         {
-            var newTask = new TaskModel
+            using(var transaction = await _context.Database.BeginTransactionAsync())
             {
-                Title = task.Title,
-                Description = task.Description,
-                DueDate = task.DueDate,
-                //UserId = task.UserId,
-                TaskPriority = TaskPriority.Medium,
-                TaskStatus = TaskStatus.ToDo
-            };
-            var _callForRep = _taskRepository.CreateTask(newTask);
-            if (_callForRep)
-            {
-                return true;
+                try
+                {
+                    //_context.Tasks.Add(task);
+                    var newTask = new TaskModel
+                    {
+                        Title = task.Title,
+                        Description = task.Description,
+                        DueDate = task.DueDate,
+                        
+                    };
+                    await _taskRepository.AddTaskAsync(newTask);
+                    //await _context.SaveChangesAsync();
+
+                    var taskAssignment = new TaskAssignment
+                    {
+                        TaskId = newTask.Id,
+                        UserId = task.UserId,
+                    };
+                    await _taskRepository.AddTaskAssignmentAsync(taskAssignment);
+                    //await _context.SaveChangesAsync();
+                    await _context.SaveChangesAsync();
+                    await transaction.CommitAsync();
+                    
+                    return true;
+                }
+                catch(Exception ex)
+                {
+                    await transaction.RollbackAsync();
+                    throw new Exception($"Greška prilikom čuvanja zadatka: {ex.Message}", ex);
+                }
             }
-            else return false;
+
+
+            //var newTask = new TaskModel
+            //{
+            //    Title = task.Title,
+            //    Description = task.Description,
+            //    DueDate = task.DueDate,
+                
+            //    TaskPriority = TaskPriority.Medium,
+            //    TaskStatus = TaskStatus.ToDo
+            //};
+            //var _callForRep = _taskRepository.CreateTask(newTask);
+            //if (_callForRep)
+            //{
+            //    return true;
+            //}
+            //else return false;
         }
 
+        public async Task<bool> DeleteTaskService(int id)
+        {
+            var delete=await _taskRepository.DeleteTask(id);
+            return delete?true:false;
+            // if(delete==null){
+            //     throw new Exception("")
+            // }
+        }
     }
 }

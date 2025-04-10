@@ -12,6 +12,8 @@ using TaskManagementAPI.Repositories;
 using TaskManagementAPI.Services.Auth;
 using TaskManagementAPI.Services.Validation;
 using BCrypt;
+using TaskManagementAPI.Db;
+using Microsoft.EntityFrameworkCore;
 
 namespace TaskManagementAPI.Services
 {
@@ -19,13 +21,15 @@ namespace TaskManagementAPI.Services
     {
         private readonly IUserRepository _userRepository;
         private readonly IAuthService _authService;
+        private readonly IRoleRepository _roleRepository;
 
-        public UserService(IUserRepository userRepParam,IAuthService auth)
+        public UserService(IUserRepository userRepParam,IAuthService auth,IRoleRepository roleRepParam)
         {
             _userRepository = userRepParam;
             _authService = auth;
+            _roleRepository=roleRepParam;
         }
-        public RegistrationResultDTO RegisterUser(RegisterUserDTO userDto)
+        public async Task<RegistrationResultDTO> RegisterUser(RegisterUserDTO userDto)
         {
             var errors = new List<string>();
 
@@ -37,8 +41,18 @@ namespace TaskManagementAPI.Services
                 errors = validationResult.Errors.Select(x => x.ErrorMessage).ToList();
                 return RegistrationResultDTO.FailureResult(errors);
             }
-            //return null;
 
+            var checkIfRoleExists=await _roleRepository.GetDefaultRoleFromDatabase();
+            if(checkIfRoleExists==null){
+                throw new Exception("Default Role doesn't exist");
+            }
+            //return null;
+            // var checkIfUsersExists=await _dbContext.Users.AnyAsync(x=>x.Email==userDto.Email);
+            
+            // var userRole=await _dbContext.Roles.FirstOrDefaultAsync(x=>x.RoleName=="User");
+            // if(userRole==null){
+            //     throw new Exception("Default role 'User' not found in the ddatabase");
+            // }
             var passwordEncrypted = BCrypt.Net.BCrypt.HashPassword(userDto.Password);
 
             var user = new User
@@ -48,10 +62,16 @@ namespace TaskManagementAPI.Services
                 Email = userDto.Email,
                 Username = userDto.Username,
                 Password = passwordEncrypted,
-                Role=UserRole.User,
+                Role=checkIfRoleExists,
             };
 
-            var createdUser = _userRepository.Add(user);
+            // _dbContext.Users.Add(user);
+            // var createdUser = _userRepository.Add(user);
+            await _userRepository.Add(user);
+            
+            // _dbContext.Users.Add(user);
+            // await _dbContext.SaveChangesAsync();
+
             return RegistrationResultDTO.SuccessResult();
             //if (createdUser != null)
             //{
@@ -141,7 +161,7 @@ namespace TaskManagementAPI.Services
                 LastName = x.LastName,
                 Email = x.Email,
                 Username = x.Username,
-                Role = x.Role.ToString()
+                Role = x.Role.RoleName
             }).ToList();
             //return new List<UserDTO>
             //{
@@ -152,6 +172,12 @@ namespace TaskManagementAPI.Services
             //    Username = users.Username,
             //    Role = users.Role
             //};
+        }
+        
+        public async Task<bool> DeleteUser(int id)
+        {
+            var delete=await _userRepository.RemoveUser(id);
+            return delete?true:false;
         }
         //public string GenerateJwtToken(UserDTO user)
         //{

@@ -35,12 +35,14 @@ namespace TaskManagementAPI.Controllers
             return Ok(user);
         }
 
+
+
         [NoAuthRequiredFilter]
         [HttpPost("Register")]
-        public IActionResult Register([FromBody] RegisterUserDTO userDto)
+        public async Task<IActionResult> Register([FromBody] RegisterUserDTO userDto)
         {
             //return Ok();
-            var isRegistered=_userService.RegisterUser(userDto);
+            var isRegistered=await _userService.RegisterUser(userDto);
             if (isRegistered.Success)
             {
                 return Ok(new { Message = "Registration successful!" });
@@ -106,6 +108,9 @@ namespace TaskManagementAPI.Controllers
             return Ok(refresh);
 
         }
+        
+
+
         [Authorize(Roles ="Admin")]
         [HttpGet("AdminPanel")]
         public IActionResult GetAdminData()
@@ -127,6 +132,18 @@ namespace TaskManagementAPI.Controllers
             //User
             //return Ok("Samo admin moze videti ovaj sadrzaj");
         }
+        
+
+        [Authorize]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteUser(int id)
+        {
+            var user=await _userService.DeleteUser(id);
+            return user?Ok("Successful user deleting"):BadRequest("User deleting failed");
+        }
+        
+        
+        
         //[Authorize(Roles="")]
         //[HttpGet("Admin-dashboard")]
         //public IActionResult AdminDashboard()

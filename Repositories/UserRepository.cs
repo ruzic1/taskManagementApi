@@ -16,12 +16,12 @@ namespace TaskManagementAPI.Repositories
         {
             _dbContext = dbContext;
         }
-        public bool Add(User userObj)
+        public async Task<bool> Add(User userObj)
         {
             try
             {
-                _dbContext.Users.Add(userObj);
-                _dbContext.SaveChanges();
+                await _dbContext.Users.AddAsync(userObj);
+                await _dbContext.SaveChangesAsync();
                 return true;
             }
             catch (Exception ex)
@@ -34,7 +34,7 @@ namespace TaskManagementAPI.Repositories
 
         public User GetUserByEmailAndPassword(string email, string password)
         {
-            var userInDatabase = _dbContext.Users.FirstOrDefault(x => x.Email == email );
+            var userInDatabase = _dbContext.Users.Include(y=>y.Role).FirstOrDefault(x => x.Email == email );
             if (userInDatabase==null)
             {
                 return null;
@@ -72,6 +72,26 @@ namespace TaskManagementAPI.Repositories
                 Role=x.Role
             }).ToList();
             return users;
+        }
+    
+        public async Task<bool> RemoveUser(int id)
+        {
+            try
+            {
+                var userForRemoving=await _dbContext.Users.FirstOrDefaultAsync(x=>x.Id==id);
+                if(userForRemoving==null)
+                {
+                    throw new Exception("User not found");
+                }
+                _dbContext.Users.Remove(userForRemoving);
+                await _dbContext.SaveChangesAsync();
+                return true;
+            }
+            catch (Exception e)
+            {
+                
+                throw new Exception("Error message: User deleting aborted");
+            }
         }
     }
 }
